@@ -1,0 +1,14 @@
+{
+  "name": "henriquecrawler",
+  "version": "1.0.0",
+  "description": "Crawler",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "André Almeida <andrebot_almeida@hotmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^0.20.0"
+  }
+}
