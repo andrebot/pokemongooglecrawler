@@ -16,14 +16,30 @@ let pokemons = [];
 let paginas = 0;
 
 //Função que faz o download das imagens
-function download (uri, filename, pokemon) {
+function download (uri, pokemon, index, qntyImagens) {
   request.head(uri, function(err, res, body){
     //Filtro a extensão da imagem antes
     let type = res.headers['content-type'];
     let imageExtension = type.split('/')[1];
+    let fileStream = fs.createWriteStream(`${pokemon}/${pokemon + index}.${imageExtension}`);
+
+    console.log(`Baixando imagem número ${index} do pokemon ${pokemon}`);
+
+    fileStream.on('close', function () {
+      if (index === qntyImagens - 1) {
+        console.log(`As imagens do pokemon ${pokemon} na pagina ${index + 1} foram baixadas com sucesso!`);
+      }
+    }).on('error', function (error) {
+      console.log('Houve um erro!!');
+      console.log(error);
+
+      request.unpipe(fileStream);
+      fileStream.end();
+    });
 
     //Download da imagem
-    request(uri).pipe(fs.createWriteStream(`${pokemon}/${filename}.${imageExtension}`));
+    request(uri)
+      .pipe(fileStream);
   });
 }
 
@@ -63,14 +79,14 @@ function crawler () {
         } else {
           //Cria um JQuery cabuloso do body da response
           let $ = cheerio.load(body);
+          let imagens = $(`img[alt*='${pokemon}']`);
+          let qntyImagens = imagens.length;
 
           //Pega todas as imagens que tem a ver com o pokemon desejado
-          $(`img[alt*='${pokemon}']`).each(function (index, element) {
+          imagens.each(function (index, element) {
             //Faz o download da imagem
-            download($(element).attr('src'), pokemon + index, pokemon);
+            download($(element).attr('src'), pokemon, index, qntyImagens);
           });
-
-          console.log(`As imagens do pokemon ${pokemon} na pagina ${pagina + 1} foram baixadas com sucesso!`);
         }
       });
     }
